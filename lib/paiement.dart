@@ -3,6 +3,7 @@ import 'package:checkout/colors.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Paiement extends StatefulWidget {
   Paiement(this._opera);
@@ -17,11 +18,13 @@ class _PaiementState extends State<Paiement> {
   bool isLoding = false, _isHidden=true;
   int indik = 0;
   var _formKey = GlobalKey<FormState>();
+  String _montant, _commission, _nom, _recepteur;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    this.lire();
   }
 
   void _toggleVisibility(){
@@ -37,6 +40,10 @@ class _PaiementState extends State<Paiement> {
       return "images/orange.jpg";
     }else if(op == "y"){
       return "images/yoomee.png";
+    }else if(op == "ca"){
+      return "images/camtel.jpg";
+    }else if(op == "ne"){
+      return "images/nextell.jpg";
     }else if(op == "e"){
       return "images/eneo.jpg";
     }else if(op == "w"){
@@ -48,6 +55,18 @@ class _PaiementState extends State<Paiement> {
     }else if(op == "p"){
       return "images/pharmacie.png";
     }
+  }
+
+  lire() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _montant = prefs.getString("montant")==null?null:prefs.getString("montant");
+      _commission = prefs.getString("commission")==null?null:prefs.getString("commission");
+      _nom = prefs.getString("nom")==null?null:prefs.getString("nom");
+      _recepteur = prefs.getString("recepteur")==null?null:prefs.getString("recepteur");
+    });
+    print("Montant $_montant");
+    print("Commission $_commission");
   }
 
   @override
@@ -136,24 +155,25 @@ class _PaiementState extends State<Paiement> {
                       children: <Widget>[
                         Padding(
                           padding: EdgeInsets.only(top: 5, bottom: 5),
-                          child: Text(_opera=="o" || _opera=="m" || _opera=="y"?"Achat de crédit téléphonique.":"Paiement facture", style: TextStyle(
+                          child: Text(_opera=="o" || _opera=="m" || _opera=="y"|| _opera == "ne" || _opera == "ca"?"Achat de crédit téléphonique.":_opera=="p"?"Paiement d'une ordonnance":"Paiement facture", style: TextStyle(
                               color: couleur_libelle_champ
                           ),),
                         ),
-                        Padding(
+                        _opera == "e" || _opera == "w" || _opera == "c" || (_opera=="t" && _recepteur=="null")?Container(): Padding(
                           padding: EdgeInsets.only(top: 5, bottom: 5),
                           child: Row(
                             children: <Widget>[
                               Expanded(
                                 flex: 1,
-                                child: Text(_opera=="o" || _opera=="m" || _opera=="y"? "Numéro bénéficiaire":"Numéro de la facture", style: TextStyle(
+                                child:Text(_opera=="o" || _opera=="m" || _opera=="y" || _opera == "ne" || _opera == "ca" || (_opera=="t" && _recepteur!="null")? "Numéro bénéficiaire":_opera=="p"?"Numéro du récepteur":"Numéro de la facture", style: TextStyle(
                                     color: couleur_libelle_champ
                                 ),),
                               ),
                               Expanded(
                                 flex: 1,
-                                child: Text(_opera=="o" || _opera=="m" || _opera=="y"?"237693685095":"1234567", style: TextStyle(
-                                    color: couleur_fond_bouton
+                                child: Text(_opera=="o" || _opera=="m" || _opera=="y" || _opera == "ne" || _opera == "ca" || (_opera=="t" && _recepteur!="null")?"$_recepteur":"1234567", style: TextStyle(
+                                    color: couleur_fond_bouton,
+                                  fontWeight: FontWeight.bold
                                 ),textAlign: TextAlign.end,),
                               ),
                             ],
@@ -171,8 +191,10 @@ class _PaiementState extends State<Paiement> {
                               ),
                               Expanded(
                                 flex: 1,
-                                child: Text("5.000,0 XAF", style: TextStyle(
-                                    color: couleur_fond_bouton
+                                child: Text("$_montant", style: TextStyle(
+                                    color: couleur_fond_bouton,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: taille_libelle_champ+3
                                 ),textAlign: TextAlign.end),
                               ),
                             ],
@@ -190,8 +212,10 @@ class _PaiementState extends State<Paiement> {
                               ),
                               Expanded(
                                 flex: 1,
-                                child: Text("0,0 XAF", style: TextStyle(
-                                    color: couleur_fond_bouton
+                                child: Text("$_commission", style: TextStyle(
+                                    color: couleur_fond_bouton,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: taille_libelle_champ+3
                                 ),textAlign: TextAlign.end),
                               ),
                             ],
@@ -209,8 +233,10 @@ class _PaiementState extends State<Paiement> {
                               ),
                               Expanded(
                                 flex: 1,
-                                child: Text("5.000,0 XAF", style: TextStyle(
-                                    color: couleur_fond_bouton
+                                child: Text("$_montant", style: TextStyle(
+                                    color: couleur_fond_bouton,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: taille_libelle_champ+3
                                 ),textAlign: TextAlign.end),
                               ),
                             ],
